@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title id="pageTitle">Boas-vindas ✨</title>
+  <meta name="description" content="Página de boas-vindas com data, hora e saudação dinâmica." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Poppins:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet" />
+  <style>
+    *,
+    *::before,
+    *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /* ═══════════════════════════
+       TEMAS POR PERÍODO DO DIA
+    ═══════════════════════════ */
+    :root {
+      /* Manhã */
+      --bg-morning-a: #0f2027;
+      --bg-morning-b: #203a43;
+      --bg-morning-c: #2c5364;
+      --accent-morning: #f59e0b;
+      --accent2-morning: #fbbf24;
+      --glow-morning: rgba(245, 158, 11, .35);
+
+      /* Tarde */
+      --bg-afternoon-a: #1a0a00;
+      --bg-afternoon-b: #3b1500;
+      --bg-afternoon-c: #ff6b35;
+      --accent-afternoon: #ff6b35;
+      --accent2-afternoon: #ff9f1c;
+      --glow-afternoon: rgba(255, 107, 53, .35);
+
+      /* Noite */
+      --bg-night-a: #03001e;
+      --bg-night-b: #0d0a3c;
+      --bg-night-c: #1a0545;
+      --accent-night: #a855f7;
+      --accent2-night: #ec4899;
+      --glow-night: rgba(168, 85, 247, .35);
+
+      /* Ativas (default = noite, JS sobrescreve) */
+      --bg-a: var(--bg-night-a);
+      --bg-b: var(--bg-night-b);
+      --bg-c: var(--bg-night-c);
+      --accent: var(--accent-night);
+      --accent2: var(--accent2-night);
+      --glow: var(--glow-night);
+
+      --text-main: #f5f0ff;
+      --text-sub: rgba(210, 190, 255, .65);
+      --star-col: #fffde7;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: radial-gradient(ellipse at 30% 10%, var(--bg-c) 0%, var(--bg-b) 45%, var(--bg-a) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 1.5s ease;
+    }
+
+    /* ═══════════════════════════
+       ESTRELAS ESTÁTICAS
+    ═══════════════════════════ */
+    .star-field,
+    #shootingStars {
+      transition: opacity 2s ease;
+    }
+
+    .star-field {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .star-dot {
+      position: absolute;
+      border-radius: 50%;
+      background: var(--star-col);
+      animation: twinkle var(--d, 2s) ease-in-out infinite alternate;
+      animation-delay: var(--delay, 0s);
+    }
+
+    @keyframes twinkle {
+      from {
+        opacity: .1;
+        transform: scale(.7);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1.4);
+      }
+    }
+
+    /* ═══════════════════════════
+       ESTRELAS CADENTES
+    ═══════════════════════════ */
+    .shooting-star {
+      position: fixed;
+      top: var(--top);
+      left: var(--left);
+      width: var(--len, 120px);
+      height: 2px;
+      background: linear-gradient(90deg, rgba(255, 255, 255, 0), #fff 60%, rgba(255, 255, 255, 0));
+      border-radius: 50%;
+      transform: rotate(var(--angle, -30deg));
+      opacity: 0;
+      z-index: 1;
+      animation: shoot var(--spd, 3s) ease-in-out var(--wait, 0s) infinite;
+      filter: drop-shadow(0 0 4px #fff);
+    }
+
+    @keyframes shoot {
+      0% {
+        opacity: 0;
+        transform: rotate(var(--angle)) translateX(0);
+      }
+
+      10% {
+        opacity: 1;
+      }
+
+      80% {
+        opacity: 1;
+      }
+
+      100% {
+        opacity: 0;
+        transform: rotate(var(--angle)) translateX(var(--travel, 400px));
+      }
+    }
+
+    /* ═══════════════════════════
+       NEBULOSAS
+    ═══════════════════════════ */
+    .nebula {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: .18;
+      pointer-events: none;
+      z-index: 0;
+      animation: nebulaPulse 8s ease-in-out infinite alternate;
+      transition: background 1.5s ease;
+    }
+
+    .nebula-1 {
+      width: 500px;
+      height: 500px;
+      top: -100px;
+      left: -100px;
+      background: var(--accent);
+    }
+
+    .nebula-2 {
+      width: 400px;
+      height: 400px;
+      bottom: -80px;
+      right: -80px;
+      background: var(--accent2);
+      animation-delay: -4s;
+    }
+
+    .nebula-3 {
+      width: 300px;
+      height: 300px;
+      top: 40%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #2563eb;
+      animation-delay: -2s;
+    }
+
+    @keyframes nebulaPulse {
+      to {
+        opacity: .28;
+        transform: scale(1.1);
+      }
+    }
+
+    .nebula-3 {
+      animation: nebulaPulse3 8s ease-in-out -2s infinite alternate;
+    }
+
+    @keyframes nebulaPulse3 {
+      to {
+        opacity: .28;
+        transform: translate(-50%, -50%) scale(1.1);
+      }
+    }
+
+    /* ═══════════════════════════
+       CARD PRINCIPAL
+    ═══════════════════════════ */
+    .welcome-card {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 52px 72px 44px;
+      border-radius: 32px;
+      background: rgba(255, 255, 255, .04);
+      border: 1px solid rgba(255, 255, 255, .12);
+      backdrop-filter: blur(24px) saturate(1.4);
+      box-shadow:
+        0 0 0 1px rgba(255, 255, 255, .06) inset,
+        0 30px 80px rgba(0, 0, 0, .6),
+        0 0 60px var(--glow);
+      animation: cardIn 1s cubic-bezier(.16, 1, .3, 1) both;
+      max-width: 640px;
+      width: 92vw;
+    }
+
+    @keyframes cardIn {
+      from {
+        opacity: 0;
+        transform: translateY(40px) scale(.96);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .welcome-card::before {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      border-radius: 33px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2), var(--accent));
+      z-index: -1;
+      opacity: 0;
+      animation: ringGlow 3s ease-in-out 1s infinite alternate;
+    }
+
+    @keyframes ringGlow {
+      to {
+        opacity: .7;
+      }
+    }
+
+    /* ─── Ícone principal ─── */
+    .period-icon {
+      font-size: 3.6rem;
+      margin-bottom: 12px;
+      display: inline-block;
+      animation: iconBounce 3s ease-in-out infinite;
+      filter: drop-shadow(0 0 16px var(--accent));
+    }
+
+    @keyframes iconBounce {
+
+      0%,
+      100% {
+        transform: translateY(0) rotate(-5deg);
+      }
+
+      50% {
+        transform: translateY(-8px) rotate(5deg);
+      }
+    }
+
+    /* ─── Saudação ─── */
+    .greeting-label {
+      font-size: clamp(.65rem, 1.5vw, .75rem);
+      font-weight: 600;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 8px;
+      opacity: .9;
+    }
+
+    .welcome-title {
+      font-family: 'Dancing Script', cursive;
+      font-size: clamp(3.5rem, 8vw, 5rem);
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: 1px;
+      background: linear-gradient(135deg, #fff 0%, #e0c3fc 35%, var(--accent) 65%, var(--accent2) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: titleShimmer 4s linear infinite;
+      background-size: 200% auto;
+      margin-bottom: 6px;
+    }
+
+    @keyframes titleShimmer {
+      to {
+        background-position: 200% center;
+      }
+    }
+
+    .welcome-sub {
+      font-size: clamp(.9rem, 2.5vw, 1.05rem);
+      font-weight: 400;
+      color: var(--text-sub);
+      margin-bottom: 28px;
+    }
+
+    /* ─── Divisor ─── */
+    .divider {
+      width: 80px;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      border-radius: 2px;
+      margin-bottom: 24px;
+    }
+
+    /* ═══════════════════════════
+       BLOCO DE DATA E HORA
+    ═══════════════════════════ */
+    .datetime-block {
+      display: flex;
+      gap: 24px;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+
+    .datetime-pill {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255, 255, 255, .06);
+      border: 1px solid rgba(255, 255, 255, .1);
+      border-radius: 16px;
+      padding: 12px 22px;
+      backdrop-filter: blur(8px);
+    }
+
+    .datetime-pill .pill-icon {
+      font-size: 1.3rem;
+      filter: drop-shadow(0 0 8px var(--accent));
+    }
+
+    .datetime-pill .pill-content {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .pill-label {
+      font-size: .65rem;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--accent);
+      opacity: .8;
+    }
+
+    .pill-value {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text-main);
+      letter-spacing: .5px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Relógio — dígitos piscando nos segundos */
+    #clockDisplay .sep {
+      animation: blink 1s step-end infinite;
+      display: inline-block;
+    }
+
+    @keyframes blink {
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: .15;
+      }
+    }
+
+    /* ─── Mensagem ─── */
+    .welcome-msg {
+      font-size: clamp(.8rem, 2vw, .95rem);
+      font-weight: 400;
+      color: var(--text-main);
+      line-height: 1.6;
+      max-width: 440px;
+      opacity: .85;
+    }
+
+    .welcome-msg strong {
+      color: #e9d5ff;
+      font-weight: 700;
+    }
+
+
+
+    /* ─── Botão Começando ─── */
+    .start-link {
+      display: inline-block;
+      margin-top: 36px;
+      font-size: 2.4rem;
+      font-family: 'Dancing Script', cursive;
+      font-weight: 700;
+      color: var(--text-main);
+      text-decoration: none;
+      transition: transform 0.3s ease, color 0.3s ease, text-shadow 0.3s ease;
+    }
+
+    .start-link:hover {
+      transform: scale(1.08) translateY(-2px);
+      color: #fff;
+      text-shadow: 0 0 16px var(--accent);
+    }
+
+    /* ─── Rodapé ─── */
+    .welcome-footer {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      font-size: .72rem;
+      color: rgba(200, 185, 255, .3);
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    /* ─── Partículas ─── */
+    @keyframes pFloat {
+      from {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+      }
+
+      to {
+        opacity: 0;
+        transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) scale(.2);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Nebulosas -->
+  <div class="nebula nebula-1"></div>
+  <div class="nebula nebula-2"></div>
+  <div class="nebula nebula-3"></div>
+
+  <!-- Estrelas estáticas -->
+  <div class="star-field" id="starField"></div>
+
+  <!-- Estrelas cadentes -->
+  <div id="shootingStars"></div>
+
+  <!-- Card principal -->
+  <main class="welcome-card" id="welcomeCard" role="main" aria-label="Mensagem de boas-vindas">
+
+    <span class="period-icon" id="periodIcon" aria-hidden="true">⭐</span>
+
+    <p class="greeting-label" id="greetingLabel">Bem-vindo(a)</p>
+    <h1 class="welcome-title" id="welcomeTitle">Olá!</h1>
+    <p class="welcome-sub" id="welcomeSub">É um prazer ter você aqui ✨</p>
+
+    <div class="divider" aria-hidden="true"></div>
+
+    <!-- Data e hora -->
+    <div class="datetime-block">
+      <div class="datetime-pill" aria-label="Data de hoje">
+        <span class="pill-icon">📅</span>
+        <div class="pill-content">
+          <span class="pill-label">Data</span>
+          <span class="pill-value" id="dateDisplay">—</span>
+        </div>
+      </div>
+      <div class="datetime-pill" aria-label="Hora atual">
+        <span class="pill-icon">⏰</span>
+        <div class="pill-content">
+          <span class="pill-label">Hora</span>
+          <span class="pill-value" id="clockDisplay">—</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mensagem -->
+    <p class="welcome-msg" id="welcomeMsg">
+      Carregando mensagem...
+    </p>
+
+    <a href="dashboard.html" class="start-link">
+      Começando...
+    </a>
+
+  </main>
+
+  <p class="welcome-footer" id="footerText">✦ bem-vindo ao universo ✦</p>
+
+  <script>
+    /* ══════════════════════════════════════
+       CONFIGURAÇÃO POR PERÍODO DO DIA
+    ══════════════════════════════════════ */
+    const periods = {
+      morning: {
+        range: [5, 12],
+        icon: '☀️',
+        label: 'Bom dia',
+        title: 'Bom Dia!',
+        sub: 'Que o seu dia seja incrível ☀️',
+        msg: 'A manhã chegou trazendo <strong>novas possibilidades</strong>. Respira fundo, acredita no seu potencial e vai conquistar mais um dia extraordinário. 🌅',
+        emojis: ['☀️', '🌤️', '🌸', '🌻', '☀️', '🌈', '🌤️'],
+        footer: '✦ que dia lindo te espera ✦',
+        cssVars: {
+          '--bg-a': '#4facfe',
+          '--bg-b': '#00f2fe',
+          '--bg-c': '#a18cd1',
+          '--accent': '#f59e0b',
+          '--accent2': '#fbbf24',
+          '--glow': 'rgba(245,158,11,.35)',
+        },
+        bodyGrad: 'radial-gradient(ellipse at 30% 10%, #a18cd1 0%, #00f2fe 45%, #4facfe 100%)',
+      },
+      afternoon: {
+        range: [12, 18],
+        icon: '🌅',
+        label: 'Boa tarde',
+        title: 'Boa Tarde!',
+        sub: 'Aproveite cada momento do dia 🌅',
+        msg: 'A tarde é cheia de <strong>energia e oportunidades</strong>. Continue firme nos seus objetivos — cada esforço está te levando a lugares extraordinários. 🚀',
+        emojis: ['🌅', '🔥', '⚡', '🌺', '🌅', '✨', '⚡'],
+        footer: '✦ o dia ainda é seu ✦',
+        cssVars: {
+          '--bg-a': '#fa709a',
+          '--bg-b': '#fee140',
+          '--bg-c': '#ff9a44',
+          '--accent': '#ff6a00',
+          '--accent2': '#ee0979',
+          '--glow': 'rgba(255,106,0,.35)',
+        },
+        bodyGrad: 'radial-gradient(ellipse at 30% 10%, #ff9a44 0%, #fee140 45%, #fa709a 100%)',
+      },
+      night: {
+        range: [18, 5],
+        icon: '🌙',
+        label: 'Boa noite',
+        title: 'Boa Noite!',
+        sub: 'O universo brilha para você 🌌',
+        msg: 'O céu está cheio de <strong>estrelas</strong> para iluminar o seu caminho. Cada passo que você dá está guiado pela luz do universo — descanse bem e prepare-se para mais um dia incrível. 🌠',
+        emojis: ['🌟', '⭐', '✨', '💫', '🌙', '⭐', '🌟'],
+        footer: '✦ o universo cuida de você ✦',
+        cssVars: {
+          '--bg-a': '#03001e',
+          '--bg-b': '#0d0a3c',
+          '--bg-c': '#1a0545',
+          '--accent': '#a855f7',
+          '--accent2': '#ec4899',
+          '--glow': 'rgba(168,85,247,.35)',
+        },
+        bodyGrad: 'radial-gradient(ellipse at 30% 10%, #1a0545 0%, #0d0a3c 45%, #03001e 100%)',
+      },
+    };
+
+    /* ══════════════════════════════════════
+       DETECTAR PERÍODO E APLICAR TEMA
+    ══════════════════════════════════════ */
+    function getPeriod(hour) {
+      if (hour >= 5 && hour < 12) return 'morning';
+      if (hour >= 12 && hour < 18) return 'afternoon';
+      return 'night';
+    }
+
+    let currentPeriod = null;
+
+    function applyTheme(period) {
+      if (period === currentPeriod) return;
+      currentPeriod = period;
+
+      const p = periods[period];
+      const root = document.documentElement;
+
+      // CSS vars
+      for (const [k, v] of Object.entries(p.cssVars)) {
+        root.style.setProperty(k, v);
+      }
+      document.body.style.background = p.bodyGrad;
+
+      // Textos
+      document.getElementById('periodIcon').textContent = p.icon;
+      document.getElementById('welcomeTitle').textContent = p.title;
+      document.getElementById('welcomeSub').textContent = p.sub;
+      document.getElementById('welcomeMsg').innerHTML = p.msg;
+      document.getElementById('footerText').textContent = p.footer;
+      document.title = `${p.label} ✨`;
+
+      // Estrelas
+      const starsOpacity = period === 'night' ? '1' : '0';
+      document.getElementById('starField').style.opacity = starsOpacity;
+      document.getElementById('shootingStars').style.opacity = starsOpacity;
+    }
+
+    /* ══════════════════════════════════════
+       RELÓGIO E DATA EM TEMPO REAL
+    ══════════════════════════════════════ */
+    const DIAS = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+    const MESES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+
+    function pad(n) { return String(n).padStart(2, '0'); }
+
+    function updateClock() {
+      const now = new Date();
+      const h = now.getHours();
+      const m = now.getMinutes();
+      const s = now.getSeconds();
+
+      // Relógio
+      document.getElementById('clockDisplay').innerHTML =
+        `${pad(h)}<span class="sep">:</span>${pad(m)}<span class="sep">:</span>${pad(s)}`;
+
+      // Data
+      const dia = DIAS[now.getDay()];
+      const numDia = now.getDate();
+      const mes = MESES[now.getMonth()];
+      const ano = now.getFullYear();
+      document.getElementById('dateDisplay').textContent =
+        `${dia}, ${numDia} ${mes} ${ano}`;
+
+      // Tema
+      applyTheme(getPeriod(h));
+    }
+
+    // Executa imediatamente e depois a cada segundo
+    updateClock();
+    setInterval(updateClock, 1000);
+
+    /* ══════════════════════════════════════
+       ESTRELAS ESTÁTICAS
+    ══════════════════════════════════════ */
+    const field = document.getElementById('starField');
+    for (let i = 0; i < 220; i++) {
+      const s = document.createElement('span');
+      s.className = 'star-dot';
+      const sz = (Math.random() * 2.8 + 0.4).toFixed(1);
+      const top = (Math.random() * 100).toFixed(2);
+      const left = (Math.random() * 100).toFixed(2);
+      const d = (Math.random() * 3 + 1.2).toFixed(2);
+      const delay = (Math.random() * 6).toFixed(2);
+      s.style.cssText = `width:${sz}px;height:${sz}px;top:${top}%;left:${left}%;--d:${d}s;--delay:${delay}s;opacity:.1;`;
+      if (Math.random() < 0.06) {
+        s.style.background = '#fbbf24';
+        s.style.boxShadow = `0 0 ${Math.round(sz * 4)}px #fbbf24`;
+      } else if (Math.random() < 0.08) {
+        s.style.background = '#c4b5fd';
+        s.style.boxShadow = `0 0 ${Math.round(sz * 3)}px #c4b5fd`;
+      }
+      field.appendChild(s);
+    }
+
+    /* ══════════════════════════════════════
+       ESTRELAS CADENTES
+    ══════════════════════════════════════ */
+    const shootWrap = document.getElementById('shootingStars');
+    const shootData = [
+      { top: '8%', left: '10%', len: '140px', travel: '350px', spd: '4s', wait: '0s', angle: '-35deg' },
+      { top: '18%', left: '55%', len: '100px', travel: '280px', spd: '5s', wait: '2.5s', angle: '-28deg' },
+      { top: '5%', left: '70%', len: '160px', travel: '400px', spd: '3.5s', wait: '1.2s', angle: '-40deg' },
+      { top: '30%', left: '2%', len: '90px', travel: '240px', spd: '6s', wait: '4s', angle: '-22deg' },
+      { top: '12%', left: '38%', len: '120px', travel: '320px', spd: '4.8s', wait: '0.7s', angle: '-32deg' },
+      { top: '2%', left: '82%', len: '80px', travel: '200px', spd: '7s', wait: '3s', angle: '-45deg' },
+    ];
+    shootData.forEach(d => {
+      const el = document.createElement('div');
+      el.className = 'shooting-star';
+      el.style.cssText = `--top:${d.top};--left:${d.left};--len:${d.len};--travel:${d.travel};--spd:${d.spd};--wait:${d.wait};--angle:${d.angle};top:${d.top};left:${d.left};`;
+      shootWrap.appendChild(el);
+    });
+  </script>
+</body>
+
+</html>
