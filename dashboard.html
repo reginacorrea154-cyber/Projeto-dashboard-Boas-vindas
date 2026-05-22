@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard – Oi Re! 🐾</title>
+  <meta name="description" content="Painel de início de dia de trabalho da Re"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
+  <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
+  <style>
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+
+    :root{
+      --bg:#f0f2f8;
+      --surface:#ffffff;
+      --surface2:#f5f6fc;
+      --border:rgba(0,0,0,.08);
+      --border-h:rgba(0,0,0,.16);
+
+      --blue:#3b82f6;
+      --blue-lt:rgba(59,130,246,.1);
+      --purple:#7c3aed;
+      --purple-lt:rgba(124,58,237,.1);
+      --green:#10b981;
+      --green-lt:rgba(16,185,129,.1);
+      --red:#ef4444;
+      --amber:#f59e0b;
+
+      --text-1:#1a1b2e;
+      --text-2:rgba(26,27,46,.55);
+      --text-3:rgba(26,27,46,.35);
+
+      --shadow-sm:0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.04);
+      --shadow-md:0 4px 16px rgba(0,0,0,.08),0 2px 6px rgba(0,0,0,.04);
+      --shadow-lg:0 12px 40px rgba(0,0,0,.1),0 4px 12px rgba(0,0,0,.05);
+
+      --r-lg:20px;--r-md:14px;--r-sm:10px;
+    }
+
+    html,body{min-height:100%;background:var(--bg);font-family:'Plus Jakarta Sans',sans-serif;color:var(--text-1)}
+
+    /* Bichinhos lado direito */
+    body::before{
+      content:'';position:fixed;inset:0;
+      background:url('cat_dog_bg.png') right 5% center/360px auto no-repeat;
+      opacity:.28;pointer-events:none;z-index:0;
+    }
+
+    /* Botão de login interativo */
+    .login-pill {
+      margin-bottom: 0 !important;
+      margin-left: 12px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+    .login-pill:hover {
+      background: var(--blue);
+      color: #fff;
+    }
+    .login-pill .text-hover { display: none; }
+    .login-pill:hover .text-default { display: none; }
+    .login-pill:hover .text-hover { display: inline; }
+
+    /* Gradiente decorativo topo */
+    body::after{
+      content:'';position:fixed;top:0;left:0;right:0;height:320px;
+      background:linear-gradient(135deg,rgba(59,130,246,.06) 0%,rgba(124,58,237,.05) 100%);
+      pointer-events:none;z-index:0;
+    }
+
+    .page{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column}
+
+    /* ── TOPBAR ── */
+    .topbar{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:16px 32px;
+      background:rgba(255,255,255,.8);
+      backdrop-filter:blur(16px);
+      border-bottom:1px solid var(--border);
+      position:sticky;top:0;z-index:100;
+      box-shadow:var(--shadow-sm);
+    }
+    .topbar-brand{display:flex;align-items:center;gap:10px;font-size:.85rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-3)}
+    .topbar-brand .dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 3px rgba(16,185,129,.2);animation:pulse 2s ease-in-out infinite}
+    @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.4)}}
+    .topbar-clock{font-size:1.4rem;font-weight:800;font-variant-numeric:tabular-nums;color:var(--text-1);letter-spacing:.5px}
+    .topbar-clock .sep{animation:blink 1s step-end infinite}
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+
+    /* ── MAIN ── */
+    .main{flex:1;padding:48px 32px 72px;max-width:1140px;width:100%;margin:0 auto}
+
+    /* ── HERO ── */
+    .hero{margin-bottom:48px;animation:fadeUp .7s cubic-bezier(.16,1,.3,1) both}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+    .hero-pill{
+      display:inline-flex;align-items:center;gap:8px;
+      font-size:.72rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;
+      color:var(--blue);background:var(--blue-lt);border:1px solid rgba(59,130,246,.2);
+      padding:5px 14px;border-radius:50px;margin-bottom:16px;
+    }
+    .hero-title{font-size:clamp(1.9rem,4.5vw,3rem);font-weight:800;line-height:1.2;letter-spacing:-.5px;margin-bottom:10px}
+    .hero-title .hi{color:var(--blue)}
+    .hero-title .start{
+      background:linear-gradient(90deg,var(--purple),var(--blue));
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+    }
+    .hero-date{display:flex;align-items:center;gap:8px;font-size:.92rem;color:var(--text-2)}
+    .hero-date .badge{
+      background:var(--surface);border:1px solid var(--border);
+      padding:4px 14px;border-radius:50px;font-size:.85rem;font-weight:600;color:var(--text-2);
+      box-shadow:var(--shadow-sm);
+    }
+
+    /* ── SECTION TITLE ── */
+    .section-title{
+      font-size:.7rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;
+      color:var(--text-3);margin-bottom:18px;display:flex;align-items:center;gap:10px;
+    }
+    .section-title::after{content:'';flex:1;height:1px;background:var(--border)}
+
+    /* ── CARDS GRID ── */
+    .cards-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:18px;margin-bottom:44px;animation:fadeUp .7s .1s cubic-bezier(.16,1,.3,1) both}
+
+    .summary-card{
+      background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);
+      padding:26px;display:flex;flex-direction:column;gap:18px;
+      box-shadow:var(--shadow-sm);
+      transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease;
+      position:relative;overflow:hidden;cursor:pointer;
+    }
+    .summary-card::after{
+      content:'';position:absolute;top:0;left:0;right:0;height:3px;
+      background:linear-gradient(90deg,var(--card-a),var(--card-b));
+      border-radius:var(--r-lg) var(--r-lg) 0 0;
+    }
+    .summary-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg);border-color:var(--border-h)}
+
+    .card-email {--card-a:#3b82f6;--card-b:#60a5fa}
+    .card-meet  {--card-a:#7c3aed;--card-b:#a78bfa}
+    .card-task  {--card-a:#10b981;--card-b:#34d399}
+
+    .card-top{display:flex;align-items:center;justify-content:space-between}
+    .card-icon{width:46px;height:46px;border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;font-size:1.3rem;background:var(--card-bg,var(--blue-lt))}
+    .card-email .card-icon{background:var(--blue-lt)}
+    .card-meet  .card-icon{background:var(--purple-lt)}
+    .card-task  .card-icon{background:var(--green-lt)}
+    .card-lbl{font-size:.65rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--card-a);background:rgba(0,0,0,.04);border:1px solid rgba(0,0,0,.06);padding:3px 10px;border-radius:50px}
+
+    .card-num{font-size:3.2rem;font-weight:800;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-2px;color:var(--text-1)}
+    .card-name{font-size:.95rem;font-weight:700;color:var(--text-1)}
+    .card-desc{font-size:.78rem;color:var(--text-2);margin-top:2px}
+
+    .card-bar-wrap{height:4px;border-radius:4px;background:rgba(0,0,0,.06);overflow:hidden}
+    .card-bar{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--card-a),var(--card-b))}
+
+    .card-foot{font-size:.75rem;color:var(--text-3);display:flex;align-items:center;gap:5px}
+    .card-foot .arr{color:var(--card-a)}
+
+    /* ── MODAL ── */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+      display: none; align-items: center; justify-content: center;
+      z-index: 1000; backdrop-filter: blur(4px);
+      opacity: 0; transition: opacity 0.3s ease;
+    }
+    .modal-overlay.show {
+      display: flex; opacity: 1;
+    }
+    .modal-content {
+      background: var(--surface); border-radius: var(--r-lg);
+      width: 90%; max-width: 500px; max-height: 80vh;
+      box-shadow: var(--shadow-lg); display: flex; flex-direction: column;
+      transform: translateY(20px); transition: transform 0.3s ease;
+    }
+    .modal-overlay.show .modal-content {
+      transform: translateY(0);
+    }
+    .modal-header {
+      padding: 20px 24px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .modal-title { font-size: 1.1rem; font-weight: 700; color: var(--text-1); }
+    .modal-close {
+      background: transparent; border: none; font-size: 1.5rem; color: var(--text-3);
+      cursor: pointer; transition: color 0.2s; line-height: 1;
+    }
+    .modal-close:hover { color: var(--red); }
+    .modal-body {
+      padding: 24px; overflow-y: auto; flex: 1;
+      display: flex; flex-direction: column; gap: 12px;
+    }
+    .offender-item {
+      padding: 12px 16px; background: var(--surface2); border: 1px solid var(--border);
+      border-radius: var(--r-md); display: flex; flex-direction: column; gap: 4px;
+      text-align: left; text-decoration: none; transition: all 0.2s ease; cursor: pointer;
+    }
+    .offender-item:hover {
+      background: var(--surface); border-color: var(--blue); box-shadow: var(--shadow-sm);
+      transform: translateY(-2px);
+    }
+    .offender-title { font-weight: 600; font-size: 0.9rem; color: var(--text-1); line-height: 1.3; }
+    .offender-sub { font-size: 0.8rem; color: var(--text-2); }
+    .tag-urgente { 
+      display: inline-flex; align-items: center; background: rgba(239,68,68,0.1); color: var(--red);
+      font-size: 0.65rem; font-weight: 700; padding: 2px 8px; border-radius: 50px;
+      margin-left: 6px; text-transform: uppercase; letter-spacing: 1px; vertical-align: middle;
+    }
+
+    /* ── FOCO DO DIA ── */
+    .focus-section{animation:fadeUp .7s .2s cubic-bezier(.16,1,.3,1) both;margin-bottom:44px}
+    .focus-list{display:flex;flex-direction:column;gap:10px}
+    .focus-item{
+      display:flex;align-items:center;gap:14px;
+      background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);
+      padding:14px 18px;box-shadow:var(--shadow-sm);
+      transition:border-color .2s,box-shadow .2s;cursor:default;
+    }
+    .focus-item:hover{border-color:var(--border-h);box-shadow:var(--shadow-md)}
+    .focus-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+    .p-high{background:#ef4444;box-shadow:0 0 0 3px rgba(239,68,68,.15)}
+    .p-mid {background:#f59e0b;box-shadow:0 0 0 3px rgba(245,158,11,.15)}
+    .p-low {background:#10b981;box-shadow:0 0 0 3px rgba(16,185,129,.15)}
+    .focus-text{flex:1;font-size:.9rem;font-weight:500;color:var(--text-1)}
+    .focus-tag{font-size:.68rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:3px 10px;border-radius:50px;background:var(--surface2);color:var(--text-3);border:1px solid var(--border)}
+
+    /* ── CHARTS ── */
+    .charts-section{animation:fadeUp .7s .3s cubic-bezier(.16,1,.3,1) both}
+    .charts-top{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px}
+    .chart-card{
+      background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);
+      padding:22px;box-shadow:var(--shadow-sm);
+      transition:box-shadow .25s,border-color .25s;
+    }
+    .chart-card:hover{box-shadow:var(--shadow-md);border-color:var(--border-h)}
+    .chart-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:18px}
+    .chart-title{font-size:.88rem;font-weight:700;color:var(--text-1)}
+    .chart-sub{font-size:.72rem;color:var(--text-3);margin-top:2px}
+    .ctag{font-size:.62rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:3px 10px;border-radius:50px;border:1px solid}
+    .ctag-red  {color:#ef4444;border-color:rgba(239,68,68,.25);background:rgba(239,68,68,.07)}
+    .ctag-amb  {color:#f59e0b;border-color:rgba(245,158,11,.25);background:rgba(245,158,11,.07)}
+    .ctag-blue {color:#3b82f6;border-color:rgba(59,130,246,.25);background:rgba(59,130,246,.07)}
+
+    .chart-legend{display:flex;flex-wrap:wrap;gap:8px 16px;margin-top:14px}
+    .leg-item{display:flex;align-items:center;gap:6px;font-size:.72rem;color:var(--text-2)}
+    .leg-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+
+    /* ── FOOTER ── */
+    .page-footer{text-align:center;padding:18px;font-size:.7rem;color:var(--text-3);letter-spacing:2px;text-transform:uppercase;border-top:1px solid var(--border);position:relative;z-index:1}
+
+    /* ── RESPONSIVE ── */
+    @media(max-width:768px){.charts-top{grid-template-columns:1fr}}
+    @media(max-width:640px){
+      .topbar{padding:14px 18px}
+      .main{padding:28px 18px 56px}
+      .cards-grid{grid-template-columns:1fr}
+      .hero-title{font-size:1.7rem}
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <header class="topbar">
+    <div class="topbar-brand"><div class="dot"></div> Dashboard · Re</div>
+    <div style="display:flex; gap: 16px; align-items:center;">
+      <div class="topbar-clock" id="clock" aria-live="polite">--:--:--</div>
+    </div>
+  </header>
+
+  <main class="main">
+
+    <!-- Hero -->
+    <section class="hero">
+      <h1 class="hero-title">
+        <span class="hi">Olá!</span><br>
+        <span class="start">Mais um dia, mais uma oportunidade de brilhar.</span>
+      </h1>
+      <div class="hero-date">
+        <span>📅</span>
+        <span class="badge" id="heroDate">—</span>
+        <span id="heroGreet" style="color:var(--text-3);font-size:.88rem"></span>
+        <button id="google-login-btn" class="hero-pill login-pill">
+          <span class="text-default">🐾 Seu início de dia</span>
+          <span class="text-hover">Entrar com Google</span>
+        </button>
+        <button id="google-logout-btn" class="hero-pill" style="margin-bottom:0; margin-left:12px; cursor:pointer; background:var(--surface); border-color:var(--border); color:var(--text-1); display:none;">Sair</button>
+      </div>
+    </section>
+
+    <!-- Cards -->
+    <p class="section-title">Resumo do dia</p>
+    <div class="cards-grid" role="list">
+
+      <article class="summary-card card-email" role="listitem">
+        <div class="card-top">
+          <div class="card-icon">📬</div>
+          <span class="card-lbl">Novos</span>
+        </div>
+        <div>
+          <div class="card-num">14</div>
+          <div class="card-name">E-mails não lidos</div>
+          <div class="card-desc">3 marcados como urgente</div>
+        </div>
+        <div class="card-bar-wrap"><div class="card-bar" style="width:70%"></div></div>
+        <div class="card-foot"><span class="arr">↗</span> 5 novos desde ontem</div>
+      </article>
+
+      <article class="summary-card card-meet" role="listitem">
+        <div class="card-top">
+          <div class="card-icon">📆</div>
+          <span class="card-lbl">Agenda</span>
+        </div>
+        <div>
+          <div class="card-num">5</div>
+          <div class="card-name">Próximos compromissos</div>
+          <div class="card-desc">SLA: Próxima às 09h30 (Hoje)</div>
+        </div>
+        <div class="card-bar-wrap"><div class="card-bar" style="width:45%"></div></div>
+        <div class="card-foot"><span class="arr">↗</span> Hoje e Amanhã</div>
+      </article>
+
+      <article class="summary-card card-task" role="listitem">
+        <div class="card-top">
+          <div class="card-icon">✅</div>
+          <span class="card-lbl">Pendentes</span>
+        </div>
+        <div>
+          <div class="card-num">7</div>
+          <div class="card-name">Tarefas pendentes</div>
+          <div class="card-desc">2 com prazo hoje</div>
+        </div>
+        <div class="card-bar-wrap"><div class="card-bar" style="width:55%"></div></div>
+        <div class="card-foot"><span class="arr">↗</span> 4 tarefas para esta semana</div>
+      </article>
+
+    </div>
+
+
+
+
+
+  </main>
+
+  <!-- Modal Detalhes (Ofensores) -->
+  <div class="modal-overlay" id="detailsModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title" id="modalTitle">Detalhes</h2>
+        <button class="modal-close" id="modalClose">&times;</button>
+      </div>
+      <div class="modal-body" id="modalBody">
+        Carregando...
+      </div>
+    </div>
+  </div>
+
+  <footer class="page-footer">🐾 Feito com carinho para a Re · Boa sorte hoje!</footer>
+</div>
+
+<script>
+  /* ── RELÓGIO E DATA ── */
+  const DIAS  = ['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'];
+  const MESES = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+  const pad = n => String(n).padStart(2,'0');
+
+  function tick(){
+    const n = new Date();
+    const h = n.getHours(), m = n.getMinutes(), s = n.getSeconds();
+    document.getElementById('clock').innerHTML = `${pad(h)}<span class="sep">:</span>${pad(m)}<span class="sep">:</span>${pad(s)}`;
+    document.getElementById('heroDate').textContent = `${DIAS[n.getDay()]}, ${n.getDate()} de ${MESES[n.getMonth()]} de ${n.getFullYear()}`;
+    document.getElementById('heroGreet').textContent = h>=5&&h<12?'☀️ Bom dia!':h<18?'🌅 Boa tarde!':'🌙 Boa noite!';
+  }
+  tick(); setInterval(tick,1000);
+
+
+
+  /* ── GOOGLE API INTEGRATION ── */
+  const CLIENT_ID = '265856466692-9i37o3urcmdm1uheu4epjj2v9o4ktg1c.apps.googleusercontent.com';
+  const DISCOVERY_DOCS = [
+    'https://www.googleapis.com/discovery/v1/apis/gmail/v1/rest',
+    'https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest'
+  ];
+  const SCOPES = 'https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/calendar.readonly';
+
+  let tokenClient;
+  let gapiInited = false;
+  let gisInited = false;
+
+  function gapiLoaded() {
+    gapi.load('client', initializeGapiClient);
+  }
+
+  async function initializeGapiClient() {
+    await gapi.client.init({
+      discoveryDocs: DISCOVERY_DOCS,
+    });
+    gapiInited = true;
+    
+    // Auto-login se viemos da tela de boas-vindas
+    const storedToken = sessionStorage.getItem('google_access_token');
+    if (storedToken) {
+      gapi.client.setToken({access_token: storedToken});
+      document.getElementById('google-login-btn').style.display = 'none';
+      document.getElementById('google-logout-btn').style.display = 'inline-flex';
+      fetchGoogleData();
+      resetInactivityTimer();
+      startAutoUpdate();
+    } else {
+      maybeEnableButtons();
+    }
+  }
+
+  function gisLoaded() {
+    tokenClient = google.accounts.oauth2.initTokenClient({
+      client_id: CLIENT_ID,
+      scope: SCOPES,
+      callback: '', // definido mais tarde
+    });
+    gisInited = true;
+    maybeEnableButtons();
+  }
+
+  function maybeEnableButtons() {
+    if (gapiInited && gisInited) {
+      document.getElementById('google-login-btn').style.visibility = 'visible';
+    }
+  }
+
+  function handleAuthClick() {
+    tokenClient.callback = async (resp) => {
+      if (resp.error !== undefined) {
+        throw (resp);
+      }
+      
+      // Salva o token para manter logado ao atualizar
+      sessionStorage.setItem('google_access_token', resp.access_token);
+      
+      document.getElementById('google-login-btn').style.display = 'none';
+      document.getElementById('google-logout-btn').style.display = 'inline-flex';
+      await fetchGoogleData();
+      resetInactivityTimer();
+      startAutoUpdate();
+    };
+
+    if (gapi.client.getToken() === null) {
+      tokenClient.requestAccessToken({prompt: 'consent'});
+    } else {
+      tokenClient.requestAccessToken({prompt: ''});
+    }
+  }
+
+  function handleSignoutClick() {
+    const token = gapi.client.getToken();
+    if (token !== null) {
+      google.accounts.oauth2.revoke(token.access_token);
+      gapi.client.setToken('');
+      document.getElementById('google-login-btn').style.display = 'inline-flex';
+      document.getElementById('google-logout-btn').style.display = 'none';
+      
+      // Limpar os dados
+      document.querySelector('.card-email .card-num').textContent = '14';
+      document.querySelector('.card-email .card-desc').textContent = '3 marcados como urgente';
+      document.querySelector('.card-meet .card-num').textContent = '5';
+      document.querySelector('.card-meet .card-desc').textContent = 'SLA: Próxima às 09h30 (Hoje)';
+      
+      sessionStorage.removeItem('google_access_token');
+      clearTimeout(inactivityTimer);
+      if (typeof autoUpdateInterval !== 'undefined') clearInterval(autoUpdateInterval);
+      window.location.href = 'boasvindas.html';
+    }
+  }
+
+  async function fetchGoogleData() {
+    try {
+      // 1. E-mails (Caixa de entrada, não lidos)
+      const labelResponse = await gapi.client.gmail.users.labels.get({
+        'userId': 'me',
+        'id': 'INBOX'
+      });
+      const unreadCount = labelResponse.result.messagesUnread || 0;
+      document.querySelector('.card-email .card-num').textContent = unreadCount;
+      document.querySelector('.card-email .card-desc').textContent = 'E-mails não lidos (Caixa de entrada)';
+
+      // 2. Calendário (Hoje e Amanhã)
+      const startOfDay = new Date();
+      startOfDay.setHours(0,0,0,0);
+      const endOfTomorrow = new Date();
+      endOfTomorrow.setDate(endOfTomorrow.getDate() + 1);
+      endOfTomorrow.setHours(23,59,59,999);
+      
+      const calendarResponse = await gapi.client.calendar.events.list({
+        'calendarId': 'primary',
+        'timeMin': startOfDay.toISOString(),
+        'timeMax': endOfTomorrow.toISOString(),
+        'showDeleted': false,
+        'singleEvents': true,
+        'orderBy': 'startTime'
+      });
+      
+      const events = calendarResponse.result.items || [];
+      document.querySelector('.card-meet .card-num').textContent = events.length;
+      
+      if (events.length > 0) {
+        const now = new Date();
+        // Encontrar a próxima reunião (próximo SLA)
+        const nextEvent = events.find(e => new Date(e.start.dateTime || e.start.date) > now);
+        
+        if (nextEvent) {
+          const eventDate = new Date(nextEvent.start.dateTime || nextEvent.start.date);
+          const isTomorrow = eventDate.getDate() !== now.getDate();
+          const dayLabel = isTomorrow ? 'Amanhã' : 'Hoje';
+          const startTime = eventDate.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
+          
+          document.querySelector('.card-meet .card-desc').textContent = `SLA: ${dayLabel} às ${startTime} — ${nextEvent.summary}`;
+        } else {
+          document.querySelector('.card-meet .card-desc').textContent = 'Todos os compromissos foram concluídos';
+        }
+      } else {
+        document.querySelector('.card-meet .card-desc').textContent = 'Sem compromissos para hoje e amanhã';
+      }
+
+    } catch (err) {
+      console.error('Erro ao buscar dados do Google:', err);
+    }
+  }
+
+  document.getElementById('google-login-btn').addEventListener('click', handleAuthClick);
+  document.getElementById('google-logout-btn').addEventListener('click', handleSignoutClick);
+
+  /* ── AUTO-LOGOUT INATIVIDADE (5 MINUTOS) ── */
+  let inactivityTimer;
+  const INACTIVITY_LIMIT = 5 * 60 * 1000;
+
+  function resetInactivityTimer() {
+    clearTimeout(inactivityTimer);
+    if (typeof gapi !== 'undefined' && gapi.client && gapi.client.getToken() !== null) {
+      inactivityTimer = setTimeout(() => {
+        alert('Sessão encerrada devido a 5 minutos de inatividade.');
+        handleSignoutClick();
+      }, INACTIVITY_LIMIT);
+    }
+  }
+
+  // Interações que reiniciam o contador
+  ['mousemove', 'keydown', 'scroll', 'click'].forEach(evt => {
+    window.addEventListener(evt, resetInactivityTimer);
+  });
+
+  /* ── AUTO-UPDATE (30 SEGUNDOS) ── */
+  let autoUpdateInterval;
+  function startAutoUpdate() {
+    if (autoUpdateInterval) clearInterval(autoUpdateInterval);
+    autoUpdateInterval = setInterval(() => {
+      if (typeof gapi !== 'undefined' && gapi.client && gapi.client.getToken() !== null) {
+        fetchGoogleData();
+      }
+    }, 30000);
+  }
+
+  /* ── MODAL E DETALHES (OFENSORES) ── */
+  const modal = document.getElementById('detailsModal');
+  const modalTitle = document.getElementById('modalTitle');
+  const modalBody = document.getElementById('modalBody');
+
+  function openModal(title) {
+    modalTitle.textContent = title;
+    modalBody.innerHTML = '<p style="text-align:center;color:var(--text-3);font-size:0.9rem;">Carregando...</p>';
+    modal.style.display = 'flex';
+    setTimeout(() => modal.classList.add('show'), 10);
+  }
+  
+  function closeModal() {
+    modal.classList.remove('show');
+    setTimeout(() => { modal.style.display = 'none'; }, 300);
+  }
+  
+  document.getElementById('modalClose').addEventListener('click', closeModal);
+  modal.addEventListener('click', (e) => {
+    if(e.target === modal) closeModal();
+  });
+
+  async function showEmailDetails() {
+    openModal('E-mails: Ofensores');
+    try {
+      const mailResponse = await gapi.client.gmail.users.messages.list({
+        'userId': 'me', 'q': 'is:unread in:inbox', 'maxResults': 5
+      });
+      const messages = mailResponse.result.messages || [];
+      if (messages.length === 0) {
+        modalBody.innerHTML = '<p style="text-align:center;color:var(--text-3);">Nenhum e-mail não lido no momento.</p>';
+        return;
+      }
+      
+      let html = '';
+      for (const msg of messages) {
+        const d = await gapi.client.gmail.users.messages.get({ 'userId': 'me', 'id': msg.id });
+        const headers = d.result.payload.headers;
+        const subject = headers.find(h => h.name === 'Subject')?.value || 'Sem assunto';
+        const fromHeader = headers.find(h => h.name === 'From')?.value || 'Desconhecido';
+        const from = fromHeader.replace(/<.*>/, '').trim(); 
+        
+        const isUrgent = subject.toLowerCase().includes('urgente') || subject.toLowerCase().includes('asap') || subject.toLowerCase().includes('prazo');
+        const urgentTag = isUrgent ? '<span class="tag-urgente">Urgente</span>' : '';
+        
+        html += `<a href="https://mail.google.com/mail/u/0/#inbox/${msg.id}" target="_blank" class="offender-item">
+                   <div class="offender-title">${subject} ${urgentTag}</div>
+                   <div class="offender-sub">Ofensor (Remetente): ${from}</div>
+                 </a>`;
+      }
+      modalBody.innerHTML = html;
+    } catch (e) {
+      modalBody.innerHTML = '<p style="color:var(--red);">Erro ao buscar detalhes do Gmail.</p>';
+    }
+  }
+
+  async function showMeetingDetails() {
+    openModal('Reuniões: Agenda (Hoje e Amanhã)');
+    try {
+      const startOfDay = new Date(); startOfDay.setHours(0,0,0,0);
+      const endOfTomorrow = new Date(); endOfTomorrow.setDate(endOfTomorrow.getDate() + 1); endOfTomorrow.setHours(23,59,59,999);
+      const calendarResponse = await gapi.client.calendar.events.list({
+        'calendarId': 'primary', 'timeMin': startOfDay.toISOString(), 'timeMax': endOfTomorrow.toISOString(),
+        'showDeleted': false, 'singleEvents': true, 'orderBy': 'startTime'
+      });
+      const events = calendarResponse.result.items || [];
+      if (events.length === 0) {
+        modalBody.innerHTML = '<p style="text-align:center;color:var(--text-3);">Sua agenda está livre hoje e amanhã!</p>';
+        return;
+      }
+      
+      let html = '';
+      const now = new Date();
+      const nextEvent = events.find(e => new Date(e.start.dateTime || e.start.date) > now);
+
+      for (const e of events) {
+        const eventDate = new Date(e.start.dateTime || e.start.date);
+        const startTime = eventDate.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
+        const isTomorrow = eventDate.getDate() !== now.getDate();
+        const dayLabel = isTomorrow ? 'Amanhã' : 'Hoje';
+        
+        let isUrgent = e.summary.toLowerCase().includes('urgente') || e.summary.toLowerCase().includes('importante');
+        let urgentTag = isUrgent ? '<span class="tag-urgente">Prioridade</span>' : '';
+        
+        if (nextEvent && e.id === nextEvent.id) {
+          urgentTag = '<span class="tag-urgente" style="background:rgba(245,158,11,0.1);color:var(--amber);">Próximo SLA</span> ' + urgentTag;
+        }
+
+        const creator = e.creator?.displayName || e.creator?.email || 'Desconhecido';
+        
+        const eventLink = e.htmlLink || 'https://calendar.google.com';
+        html += `<a href="${eventLink}" target="_blank" class="offender-item">
+                   <div class="offender-title">${e.summary} ${urgentTag}</div>
+                   <div class="offender-sub">Quando: ${dayLabel} às ${startTime} | Ofensor: ${creator}</div>
+                 </a>`;
+      }
+      modalBody.innerHTML = html;
+    } catch (e) {
+      modalBody.innerHTML = '<p style="color:var(--red);">Erro ao buscar detalhes da Agenda.</p>';
+    }
+  }
+
+  function showTaskDetails() {
+    openModal('Tarefas: Pendências');
+    const html = `
+      <a href="https://calendar.google.com/calendar/u/0/r/tasks" target="_blank" class="offender-item">
+        <div class="offender-title">Fechamento do Relatório Financeiro <span class="tag-urgente">Urgente</span></div>
+        <div class="offender-sub">Prazo: Hoje, 18:00 | Ofensor: Diretoria</div>
+      </a>
+      <a href="https://calendar.google.com/calendar/u/0/r/tasks" target="_blank" class="offender-item">
+        <div class="offender-title">Aprovação do Orçamento de Marketing</div>
+        <div class="offender-sub">Prazo: Amanhã | Ofensor: Equipe Marketing</div>
+      </a>
+      <a href="https://calendar.google.com/calendar/u/0/r/tasks" target="_blank" class="offender-item">
+        <div class="offender-title">Revisão do projeto Dashboard</div>
+        <div class="offender-sub">Prazo: Semanal | Ofensor: Eu mesma</div>
+      </a>
+    `;
+    modalBody.innerHTML = html;
+  }
+
+  document.querySelector('.card-email').addEventListener('click', () => {
+    if (typeof gapi !== 'undefined' && gapi.client && gapi.client.getToken() !== null) showEmailDetails();
+    else { openModal('E-mails'); modalBody.innerHTML = '<p style="color:var(--text-2);">Você precisa fazer login no Google primeiro para ver os ofensores reais (seus remetentes não lidos).</p>'; }
+  });
+  document.querySelector('.card-meet').addEventListener('click', () => {
+    if (typeof gapi !== 'undefined' && gapi.client && gapi.client.getToken() !== null) showMeetingDetails();
+    else { openModal('Reuniões'); modalBody.innerHTML = '<p style="color:var(--text-2);">Você precisa fazer login no Google primeiro para ver sua agenda e os ofensores das reuniões.</p>'; }
+  });
+  document.querySelector('.card-task').addEventListener('click', showTaskDetails);
+</script>
+</body>
+</html>
